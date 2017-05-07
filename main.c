@@ -1,0 +1,118 @@
+/* Copyright (c) Allen Bao
+ * Licensed under the GNU GPL */
+
+#include <pebble.h>
+
+static Window* s_main_window;
+static TextLayer *s_text_layer, *s_date_layer, *s_battery_layer, *s_bottom_layer;
+static int s_bat_level;
+GRect bounds;
+static void update_bat(BatteryChargeState state);
+
+static void main_window_load(Window *window) {
+  // Get information about the Window
+  Layer *window_layer = window_get_root_layer(window);
+  window_set_background_color(window, GColorLightGray);
+  bounds = layer_get_bounds(window_layer);
+
+  // Create the TextLayer with specific bounds
+  s_text_layer = text_layer_create(
+      GRect(0, (bounds.size.h / 2) - 30, bounds.size.w, 54));
+
+  // Improve the layout to be more like a watchface
+  text_layer_set_background_color(s_text_layer, GColorWhite);
+  text_layer_set_text_color(s_text_layer, GColorBlack);
+  text_layer_set_text(s_text_layer, "12:00");
+  text_layer_set_font(s_text_layer, fonts_get_system_font(FONT_KEY_LECO_42_NUMBERS));
+  text_layer_set_text_alignment(s_text_layer, GTextAlignmentCenter);
+
+  s_date_layer = text_layer_create(GRect(0, 10, bounds.size.w, 60));
+                                   
+  text_layer_set_background_color(s_date_layer, GColorClear);
+  text_layer_set_text_color(s_date_layer, GColorWhite);
+  text_layer_set_text(s_date_layer, "Mon 4 Jul");
+  text_layer_set_font(s_date_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
+  text_layer_set_text_alignment(s_date_layer, GTextAlignmentCenter);
+
+  s_battery_layer = text_layer_create(GRect(0, bounds.size.h - 54, bounds.size.w, 30));
+  
+  text_layer_set_background_color(s_battery_layer, GColorClear);
+  text_layer_set_text_color(s_battery_layer, GColorWhite);
+  text_layer_set_text(s_battery_layer, "100%");
+  text_layer_set_font(s_battery_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  text_layer_set_text_alignment(s_battery_layer, GTextAlignmentCenter);
+  
+  s_bottom_layer = text_layer_create(GRect(0, bounds.size.h - 14, bounds.size.w, 14));
+  text_layer_set_background_color(s_bottom_layer, GColorBlack);
+  
+  // Add it as a child layer to the Window's root layer
+  layer_add_child(window_layer, text_layer_get_layer(s_text_layer));
+  layer_add_child(window_layer, text_layer_get_layer(s_date_layer));
+  layer_add_child(window_layer, text_layer_get_layer(s_bottom_layer));
+  layer_add_child(window_layer, text_layer_get_layer(s_battery_layer));
+  
+  update_bat(battery_state_service_peek());
+}
+
+static void update_time() {
+  // Get a tm structure
+  time_t temp = time(NULL);
+  struct tm *tick_time = localtime(&temp);
+
+  // Write the current hours and minutes into a buffer
+  static char s_buffer[8];
+  strftime(s_buffer, sizeof(s_buffer), clock_is_24h_style() ?
+                                          "%H:%M" : "%I:%M", tick_time);
+
+  // Display this time on the TextLayer
+  text_layer_set_text(s_text_layer, s_buffer);
+  
+  static char date_buffer[24];
+  strftime(date_buffer, sizeof(date_buffer), "%a %d %b", tick_time);
+  
+  text_layer_set_text(s_date_layer, date_buffer);
+}
+
+static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+  update_time();
+}
+
+static void update_bat(BatteryChargeState state) {
+  static char buf[5];
+  s_bat_level = state.charge_percent;
+  snprintf(buf, 5, "%d%%", s_bat_level);
+  text_layer_set_text(s_battery_layer, buf);
+  GSize size = {.h = 14, .w = 0};
+  size.w = (bounds.size.w * state.charge_percent) / 100;
+  text_layer_set_size(s_bottom_layer, size);
+}
+
+static void main_window_unload(Window *window) {
+
+}
+
+static void init() {
+  s_main_window = window_create();
+  
+  window_set_window_handlers(s_main_window, (WindowHandlers) {
+    .load = main_window_load,
+    .unload = main_window_unload
+  });
+  
+  tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
+  battery_state_service_subscribe(update_bat);
+
+  // Show the Window on the watch, with animated=true
+  window_stack_push(s_main_window, true);
+  update_time();
+}
+
+static void deinit() {
+  window_destroy(s_main_window);
+}
+
+int main(void) {
+  init();
+  app_event_loop();
+  deinit();
+}
