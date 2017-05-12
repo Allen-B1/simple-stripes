@@ -88,7 +88,10 @@ static void update_bat(BatteryChargeState state) {
 }
 
 static void main_window_unload(Window *window) {
-
+  text_layer_destroy(s_text_layer);
+  text_layer_destroy(s_battery_layer);
+  text_layer_destroy(s_date_layer);
+  text_layer_destroy(s_bottom_layer);
 }
 
 static void init() {
