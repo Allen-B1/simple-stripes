@@ -6,9 +6,7 @@
     "pebble-app"
   ],
   "private": false,
-  "dependencies": {
-    "pebble-clay": "^1.0.4"
-  },
+  "dependencies": {},
   "pebble": {
     "displayName": "simple-stripes",
     "uuid": "ce854838-2ef3-4627-83bb-a9803beacf05",
