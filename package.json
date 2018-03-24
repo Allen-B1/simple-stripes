@@ -1,10 +1,14 @@
 {
   "name": "simple-stripes",
-  "author": "",
+  "author": "Allen B",
   "version": "1.2",
-  "keywords": ["pebble-app"],
+  "keywords": [
+    "pebble-app"
+  ],
   "private": false,
-  "dependencies": {},
+  "dependencies": {
+    "pebble-clay": "^1.0.4"
+  },
   "pebble": {
     "displayName": "simple-stripes",
     "uuid": "ce854838-2ef3-4627-83bb-a9803beacf05",
