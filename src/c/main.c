@@ -4,7 +4,7 @@
 #include <pebble.h>
 
 static Window* s_main_window;
-static TextLayer *s_text_layer, *s_date_layer, *s_battery_layer, *s_bottom_layer;
+static TextLayer *s_text_layer, *s_date_layer, *s_battery_layer;
 static int s_bat_level;
 GRect bounds;
 static void update_bat(BatteryChargeState state);
@@ -34,21 +34,16 @@ static void main_window_load(Window *window) {
   text_layer_set_font(s_date_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
   text_layer_set_text_alignment(s_date_layer, GTextAlignmentCenter);
 
-  s_battery_layer = text_layer_create(GRect(0, bounds.size.h - 54, bounds.size.w, 30));
-  
-  text_layer_set_background_color(s_battery_layer, GColorClear);
+  s_battery_layer = text_layer_create(GRect(0, bounds.size.h - 18, bounds.size.w, 18));
+  text_layer_set_background_color(s_battery_layer, GColorBlack);
   text_layer_set_text_color(s_battery_layer, GColorWhite);
   text_layer_set_text(s_battery_layer, "100%");
-  text_layer_set_font(s_battery_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  text_layer_set_font(s_battery_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
   text_layer_set_text_alignment(s_battery_layer, GTextAlignmentCenter);
-  
-  s_bottom_layer = text_layer_create(GRect(0, bounds.size.h - 14, bounds.size.w, 14));
-  text_layer_set_background_color(s_bottom_layer, GColorBlack);
   
   // Add it as a child layer to the Window's root layer
   layer_add_child(window_layer, text_layer_get_layer(s_text_layer));
   layer_add_child(window_layer, text_layer_get_layer(s_date_layer));
-  layer_add_child(window_layer, text_layer_get_layer(s_bottom_layer));
   layer_add_child(window_layer, text_layer_get_layer(s_battery_layer));
   
   update_bat(battery_state_service_peek());
@@ -82,16 +77,15 @@ static void update_bat(BatteryChargeState state) {
   s_bat_level = state.charge_percent;
   snprintf(buf, 5, "%d%%", s_bat_level);
   text_layer_set_text(s_battery_layer, buf);
-  GSize size = {.h = 14, .w = 0};
+  GSize size = {.h=18};
   size.w = (bounds.size.w * state.charge_percent) / 100;
-  text_layer_set_size(s_bottom_layer, size);
+  text_layer_set_size(s_battery_layer, size);
 }
 
 static void main_window_unload(Window *window) {
   text_layer_destroy(s_text_layer);
   text_layer_destroy(s_battery_layer);
   text_layer_destroy(s_date_layer);
-  text_layer_destroy(s_bottom_layer);
 }
 
 static void init() {
