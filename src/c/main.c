@@ -17,12 +17,11 @@ static void main_window_load(Window *window) {
 
   // Create the TextLayer with specific bounds
   s_text_layer = text_layer_create(
-      GRect(0, (bounds.size.h / 2) - 30, bounds.size.w, 54));
+      GRect(0, bounds.size.h / 2) - 30, bounds.size.w, 54));
 
   // Improve the layout to be more like a watchface
   text_layer_set_background_color(s_text_layer, GColorWhite);
   text_layer_set_text_color(s_text_layer, GColorBlack);
-  text_layer_set_text(s_text_layer, "12:00");
   text_layer_set_font(s_text_layer, fonts_get_system_font(FONT_KEY_LECO_42_NUMBERS));
   text_layer_set_text_alignment(s_text_layer, GTextAlignmentCenter);
 
