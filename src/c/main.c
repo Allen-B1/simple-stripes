@@ -17,7 +17,7 @@ static void main_window_load(Window *window) {
 
   // Create the TextLayer with specific bounds
   s_text_layer = text_layer_create(
-      GRect(0, bounds.size.h / 2) - 30, bounds.size.w, 54));
+      GRect(0, bounds.size.h / 2 - 30, bounds.size.w, 54));
 
   // Improve the layout to be more like a watchface
   text_layer_set_background_color(s_text_layer, GColorWhite);
