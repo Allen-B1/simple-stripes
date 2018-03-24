@@ -1,0 +1,26 @@
+{
+  "name": "simple-stripes",
+  "author": "",
+  "version": "1.2",
+  "keywords": ["pebble-app"],
+  "private": false,
+  "dependencies": {},
+  "pebble": {
+    "displayName": "simple-stripes",
+    "uuid": "ce854838-2ef3-4627-83bb-a9803beacf05",
+    "sdkVersion": "3",
+    "enableMultiJS": true,
+    "targetPlatforms": [
+      "aplite",
+      "basalt",
+      "chalk",
+      "diorite"
+    ],
+    "watchapp": {
+      "watchface": true
+    },
+    "resources": {
+      "media": []
+    }
+  }
+}
