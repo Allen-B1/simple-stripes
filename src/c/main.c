@@ -12,21 +12,20 @@ static void update_bat(BatteryChargeState state);
 static void main_window_load(Window *window) {
   // Get information about the Window
   Layer *window_layer = window_get_root_layer(window);
-  window_set_background_color(window, GColorLightGray);
+  window_set_background_color(window, GColorWhite);
   bounds = layer_get_bounds(window_layer);
 
   // Create the TextLayer with specific bounds
   s_text_layer = text_layer_create(
-      GRect(0, bounds.size.h / 2 - 20, bounds.size.w, 54));
+      GRect(0, bounds.size.h / 2 - 32, bounds.size.w, 42));
 
-  // Improve the layout to be more like a watchface
-  text_layer_set_background_color(s_text_layer, GColorWhite);
+  text_layer_set_background_color(s_text_layer, GColorClear);
   text_layer_set_text_color(s_text_layer, GColorBlack);
   text_layer_set_font(s_text_layer, fonts_get_system_font(FONT_KEY_LECO_42_NUMBERS));
   text_layer_set_text_alignment(s_text_layer, GTextAlignmentCenter);
 
-  s_date_layer = text_layer_create(GRect(0, bounds.size.h / 4 - 24, bounds.size.w, 28));     
-  text_layer_set_background_color(s_date_layer, GColorClear);
+  s_date_layer = text_layer_create(GRect(0, 0, bounds.size.w, 36));     
+  text_layer_set_background_color(s_date_layer, GColorLightGray);
   text_layer_set_text_color(s_date_layer, GColorWhite);
   text_layer_set_text(s_date_layer, "Mon 4 Jul");
   text_layer_set_font(s_date_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
@@ -39,18 +38,18 @@ static void main_window_load(Window *window) {
   text_layer_set_font(s_battery_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
   text_layer_set_text_alignment(s_battery_layer, GTextAlignmentCenter);
 
-  s_year_layer = text_layer_create(GRect(0, bounds.size.h * 3 / 4 - 4, bounds.size.w, 24));    
-  text_layer_set_background_color(s_year_layer, GColorClear);
+  s_year_layer = text_layer_create(GRect(0, bounds.size.h - 44, bounds.size.w, 44));    
+  text_layer_set_background_color(s_year_layer, GColorLightGray);
   text_layer_set_text_color(s_year_layer, GColorWhite);
-  text_layer_set_text(s_year_layer, "2018");
-  text_layer_set_font(s_year_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+  text_layer_set_text(s_year_layer, "1900");
+  text_layer_set_font(s_year_layer, fonts_get_system_font(FONT_KEY_LECO_20_BOLD_NUMBERS));
   text_layer_set_text_alignment(s_year_layer, GTextAlignmentCenter);
 
   // Add it as a child layer to the Window's root layer
   layer_add_child(window_layer, text_layer_get_layer(s_text_layer));
   layer_add_child(window_layer, text_layer_get_layer(s_date_layer));
-  layer_add_child(window_layer, text_layer_get_layer(s_battery_layer));
   layer_add_child(window_layer, text_layer_get_layer(s_year_layer));
+  layer_add_child(window_layer, text_layer_get_layer(s_battery_layer));
   
   update_bat(battery_state_service_peek());
 }
