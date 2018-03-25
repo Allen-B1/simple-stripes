@@ -9,7 +9,7 @@
   "dependencies": {},
   "pebble": {
     "displayName": "simple-stripes",
-    "uuid": "8c66f267-f85b-4278-8c07-3537872204a0",
+    "uuid": "ad138748-c89a-4be5-bcac-58be7e99572e",
     "sdkVersion": "3",
     "enableMultiJS": true,
     "targetPlatforms": [
