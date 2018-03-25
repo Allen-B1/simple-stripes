@@ -7,7 +7,36 @@ static Window* s_main_window;
 static TextLayer *s_text_layer, *s_date_layer, *s_year_layer, *s_battery_layer;
 static int s_bat_level;
 GRect bounds;
-static void update_bat(BatteryChargeState state);
+
+static void update_bat(BatteryChargeState state) {
+  static char buf[5];
+  s_bat_level = state.charge_percent;
+  snprintf(buf, 5, "%d%%", s_bat_level);
+  text_layer_set_text(s_battery_layer, buf);
+  GSize size = {.h=18};
+  size.w = (bounds.size.w * state.charge_percent) / 100;
+  text_layer_set_size(s_battery_layer, size);
+}
+
+static void update_time(struct tm* tick_time) {
+  // Write the current hours and minutes into a buffer
+  static char s_buffer[8];
+  strftime(s_buffer, sizeof(s_buffer), clock_is_24h_style() ?
+                                          "%H:%M" : "%I:%M", tick_time);
+
+  // Display this time on the TextLayer
+  text_layer_set_text(s_text_layer, s_buffer);
+
+  static char s_year_buffer[5];
+  snprintf(s_year_buffer, sizeof(s_year_buffer), "%d", tick_time->tm_year + 1900);
+  text_layer_set_text(s_year_layer, s_year_buffer);
+  
+  static char date_buffer[24];
+  strftime(date_buffer, sizeof(date_buffer), "%a %d %b", tick_time);
+  
+  text_layer_set_text(s_date_layer, date_buffer);
+}
+
 
 static void main_window_load(Window *window) {
   // Get information about the Window
@@ -51,45 +80,16 @@ static void main_window_load(Window *window) {
   layer_add_child(window_layer, text_layer_get_layer(s_year_layer));
   layer_add_child(window_layer, text_layer_get_layer(s_battery_layer));
   
+  time_t temp = time(NULL);
+  struct tm *tick_time = localtime(&temp);
+  update_time(tick_time);
   update_bat(battery_state_service_peek());
 }
 
-static void update_time() {
-  // Get a tm structure
-  time_t temp = time(NULL);
-  struct tm *tick_time = localtime(&temp);
-
-  // Write the current hours and minutes into a buffer
-  static char s_buffer[8];
-  strftime(s_buffer, sizeof(s_buffer), clock_is_24h_style() ?
-                                          "%H:%M" : "%I:%M", tick_time);
-
-  // Display this time on the TextLayer
-  text_layer_set_text(s_text_layer, s_buffer);
-
-  static char s_year_buffer[5];
-  snprintf(s_year_buffer, sizeof(s_year_buffer), "%d", tick_time->tm_year + 1900);
-  text_layer_set_text(s_year_layer, s_year_buffer);
-  
-  static char date_buffer[24];
-  strftime(date_buffer, sizeof(date_buffer), "%a %d %b", tick_time);
-  
-  text_layer_set_text(s_date_layer, date_buffer);
-}
-
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-  update_time();
+  update_time(tick_time);
 }
 
-static void update_bat(BatteryChargeState state) {
-  static char buf[5];
-  s_bat_level = state.charge_percent;
-  snprintf(buf, 5, "%d%%", s_bat_level);
-  text_layer_set_text(s_battery_layer, buf);
-  GSize size = {.h=18};
-  size.w = (bounds.size.w * state.charge_percent) / 100;
-  text_layer_set_size(s_battery_layer, size);
-}
 
 static void main_window_unload(Window *window) {
   text_layer_destroy(s_text_layer);
@@ -111,7 +111,6 @@ static void init() {
 
   // Show the Window on the watch, with animated=true
   window_stack_push(s_main_window, true);
-  update_time();
 }
 
 static void deinit() {
