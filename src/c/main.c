@@ -4,7 +4,7 @@
 #include <pebble.h>
 
 static Window* s_main_window;
-static TextLayer *s_text_layer, *s_date_layer, *s_battery_layer;
+static TextLayer *s_text_layer, *s_date_layer, *s_year_layer, *s_battery_layer;
 static int s_bat_level;
 GRect bounds;
 static void update_bat(BatteryChargeState state);
@@ -17,7 +17,7 @@ static void main_window_load(Window *window) {
 
   // Create the TextLayer with specific bounds
   s_text_layer = text_layer_create(
-      GRect(0, bounds.size.h / 2 - 30, bounds.size.w, 54));
+      GRect(0, bounds.size.h / 2 - 20, bounds.size.w, 54));
 
   // Improve the layout to be more like a watchface
   text_layer_set_background_color(s_text_layer, GColorWhite);
@@ -25,8 +25,7 @@ static void main_window_load(Window *window) {
   text_layer_set_font(s_text_layer, fonts_get_system_font(FONT_KEY_LECO_42_NUMBERS));
   text_layer_set_text_alignment(s_text_layer, GTextAlignmentCenter);
 
-  s_date_layer = text_layer_create(GRect(0, 10, bounds.size.w, 60));
-                                   
+  s_date_layer = text_layer_create(GRect(0, bounds.size.h / 4 - 24, bounds.size.w, 28));     
   text_layer_set_background_color(s_date_layer, GColorClear);
   text_layer_set_text_color(s_date_layer, GColorWhite);
   text_layer_set_text(s_date_layer, "Mon 4 Jul");
@@ -39,11 +38,19 @@ static void main_window_load(Window *window) {
   text_layer_set_text(s_battery_layer, "100%");
   text_layer_set_font(s_battery_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
   text_layer_set_text_alignment(s_battery_layer, GTextAlignmentCenter);
-  
+
+  s_year_layer = text_layer_create(GRect(0, bounds.size.h * 3 / 4 - 4, bounds.size.w, 24));    
+  text_layer_set_background_color(s_year_layer, GColorClear);
+  text_layer_set_text_color(s_year_layer, GColorWhite);
+  text_layer_set_text(s_year_layer, "2018");
+  text_layer_set_font(s_year_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+  text_layer_set_text_alignment(s_year_layer, GTextAlignmentCenter);
+
   // Add it as a child layer to the Window's root layer
   layer_add_child(window_layer, text_layer_get_layer(s_text_layer));
   layer_add_child(window_layer, text_layer_get_layer(s_date_layer));
   layer_add_child(window_layer, text_layer_get_layer(s_battery_layer));
+  layer_add_child(window_layer, text_layer_get_layer(s_year_layer));
   
   update_bat(battery_state_service_peek());
 }
@@ -60,6 +67,10 @@ static void update_time() {
 
   // Display this time on the TextLayer
   text_layer_set_text(s_text_layer, s_buffer);
+
+  static char s_year_buffer[5];
+  snprintf(s_year_buffer, sizeof(s_year_buffer), "%d", tick_time->tm_year + 1900);
+  text_layer_set_text(s_year_layer, s_year_buffer);
   
   static char date_buffer[24];
   strftime(date_buffer, sizeof(date_buffer), "%a %d %b", tick_time);
@@ -85,6 +96,7 @@ static void main_window_unload(Window *window) {
   text_layer_destroy(s_text_layer);
   text_layer_destroy(s_battery_layer);
   text_layer_destroy(s_date_layer);
+  text_layer_destroy(s_year_layer);
 }
 
 static void init() {
